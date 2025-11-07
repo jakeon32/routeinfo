@@ -2,7 +2,11 @@ import "reflect-metadata";
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import { AppDataSource } from "./config/database";
+import stationRoutes from "./routes/stationRoutes";
+import stopRoutes from "./routes/stopRoutes";
+import uploadRoutes from "./routes/uploadRoutes";
 
 dotenv.config();
 
@@ -16,6 +20,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Static files (업로드된 파일 서빙)
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({
@@ -25,6 +32,11 @@ app.get("/api/health", (req: Request, res: Response) => {
     database: AppDataSource.isInitialized ? "Connected" : "Disconnected"
   });
 });
+
+// API Routes
+app.use("/api/stations", stationRoutes);
+app.use("/api/stops", stopRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Initialize database connection and start server
 AppDataSource.initialize()

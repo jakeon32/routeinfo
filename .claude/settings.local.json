@@ -15,7 +15,17 @@
       "Bash(cmd //c taskkill //PID 19556 //F)",
       "Bash(cmd //c taskkill //PID 36528 //F)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Phase 1 완료 - 기본 인프라 구축\n\n- 백엔드: Node.js + Express + TypeScript 설정\n- 프론트엔드: React + Vite + TypeScript + Tailwind CSS 설정\n- 데이터베이스: MySQL 스키마 설계 및 마이그레이션\n- TypeORM 엔티티 모델 구현 (Station, Stop, Route, RouteAttribute, RouteStop)\n- 헬스체크 API 구현\n- 개발 환경 설정 완료\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(cmd //c taskkill //PID 39304 //F)",
+      "Bash(cmd //c taskkill //PID 40852 //F)",
+      "Bash(echo:*)",
+      "Bash(frontend/.env.example)",
+      "Bash(frontend/KAKAO_MAPS_SETUP.md)",
+      "Bash(PHASE2_SUMMARY.md)"
     ],
     "deny": [],
     "ask": []
