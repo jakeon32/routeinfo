@@ -1,11 +1,5 @@
-import { useEffect, useRef } from 'react';
-
-// Kakao Maps 타입 정의
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
+import { useEffect, useRef, useState } from 'react';
+import { loadKakaoMapScript } from '../utils/kakaoMapLoader';
 
 interface KakaoMapProps {
   latitude: number;
@@ -22,9 +16,23 @@ interface KakaoMapProps {
 function KakaoMap({ latitude, longitude, onLocationSelect, markers, height = '400px' }: KakaoMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Kakao Maps SDK 로드
+  useEffect(() => {
+    loadKakaoMapScript()
+      .then(() => {
+        setIsLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Kakao Maps 로드 실패:', err);
+        setError(err.message);
+      });
+  }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || !window.kakao) return;
+    if (!mapContainer.current || !window.kakao || !isLoaded) return;
 
     const { kakao } = window;
 
@@ -109,7 +117,32 @@ function KakaoMap({ latitude, longitude, onLocationSelect, markers, height = '40
       }
     }
 
-  }, [latitude, longitude, markers, onLocationSelect]);
+  }, [latitude, longitude, markers, onLocationSelect, isLoaded]);
+
+  if (error) {
+    return (
+      <div
+        style={{ width: '100%', height }}
+        className="rounded-lg border border-red-300 bg-red-50 flex items-center justify-center"
+      >
+        <div className="text-red-600 text-sm text-center p-4">
+          <p className="font-semibold">지도 로드 실패</p>
+          <p className="text-xs mt-1">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div
+        style={{ width: '100%', height }}
+        className="rounded-lg border border-gray-300 bg-gray-50 flex items-center justify-center"
+      >
+        <div className="text-gray-500 text-sm">지도 로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div
