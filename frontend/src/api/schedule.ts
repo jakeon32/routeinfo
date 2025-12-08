@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Schedule, CreateScheduleRequest, UpdateScheduleRequest } from '../types/schedule';
+import type { Schedule, CreateScheduleRequest, UpdateScheduleRequest } from '../types/schedule';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 

@@ -1,4 +1,4 @@
-import { Route } from './route';
+import type { Route } from './route';
 
 export interface Schedule {
     scheduleId: number;

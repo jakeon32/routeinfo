@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Route, CreateRouteRequest, UpdateRouteRequest } from '../types/route';
+import type { Route, CreateRouteRequest, UpdateRouteRequest } from '../types/route';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
