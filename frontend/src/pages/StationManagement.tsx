@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllStations, createStation, updateStation, deleteStation } from '../api/station';
-import { getAllStops, createStop, updateStop, deleteStop } from '../api/stop';
+import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStationRequest, CreateStopRequest } from '../types/station';
 
 function StationManagement() {

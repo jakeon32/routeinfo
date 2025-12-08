@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getStationById, updateStation } from '../api/station';
-import { getAllStops, createStop, updateStop, deleteStop } from '../api/stop';
+import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStopRequest } from '../types/station';
 import KakaoMap from '../components/KakaoMap';
 import { uploadPhoto, getPhotoUrl } from '../api/upload';
