@@ -6,6 +6,8 @@ import path from "path";
 import { AppDataSource } from "./config/database";
 import stationRoutes from "./routes/stationRoutes";
 import stopRoutes from "./routes/stopRoutes";
+import routeRoutes from "./routes/routeRoutes";
+import scheduleRoutes from "./routes/scheduleRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
 
 dotenv.config();
@@ -36,6 +38,8 @@ app.get("/api/health", (req: Request, res: Response) => {
 // API Routes
 app.use("/api/stations", stationRoutes);
 app.use("/api/stops", stopRoutes);
+app.use("/api/routes", routeRoutes);
+app.use("/api/schedules", scheduleRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // Initialize database connection and start server only if running directly
