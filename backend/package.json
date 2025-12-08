@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.2",
     "@types/multer": "^2.0.0",
     "@types/pg": "^8.15.6",
     "cors": "^2.8.5",
