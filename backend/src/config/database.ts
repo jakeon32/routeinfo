@@ -16,10 +16,10 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: true, // 개발 초기 단계이므로 true로 설정 (프로덕션 배포 시 주의)
+  synchronize: process.env.NODE_ENV !== "production", // 프로덕션에서는 false (SQL로 스키마 관리)
   logging: process.env.NODE_ENV === "development",
   entities: [Station, Stop, Route, RouteAttribute, RouteStop],
-  migrations: [], // Vercel 환경에서 마이그레이션 파일 경로 문제 방지 위해 빈 배열로 설정 (Supabase SQL Editor 사용 권장)
+  migrations: [],
   subscribers: [],
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
