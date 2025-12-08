@@ -38,19 +38,21 @@ app.use("/api/stations", stationRoutes);
 app.use("/api/stops", stopRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// Initialize database connection and start server
-AppDataSource.initialize()
-  .then(() => {
-    console.log("✅ Database connection established");
+// Initialize database connection and start server only if running directly
+if (require.main === module) {
+  AppDataSource.initialize()
+    .then(() => {
+      console.log("✅ Database connection established");
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on http://localhost:${PORT}`);
-      console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+      app.listen(PORT, () => {
+        console.log(`🚀 Server is running on http://localhost:${PORT}`);
+        console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+      });
+    })
+    .catch((error) => {
+      console.error("❌ Database connection failed:", error);
+      process.exit(1);
     });
-  })
-  .catch((error) => {
-    console.error("❌ Database connection failed:", error);
-    process.exit(1);
-  });
+}
 
 export default app;
