@@ -26,64 +26,72 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-lg shadow-xl p-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
-          🚌 노선 및 스케줄 관리 시스템
-        </h1>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-800">대시보드</h1>
+        <div className="text-sm text-gray-500">
+          Last updated: {new Date().toLocaleTimeString()}
+        </div>
+      </div>
 
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-500 text-sm font-medium">System Status</h3>
+            <span className={`px-2 py-1 rounded text-xs font-semibold ${health?.status === 'ok' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+              {health?.status === 'ok' ? 'Normal' : 'Error'}
+            </span>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
+            {health?.status === 'ok' ? 'Online' : 'Offline'}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-500 text-sm font-medium">Database</h3>
+            <span className="text-2xl">🗄️</span>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
+            {health?.database === 'connected' ? 'Connected' : 'Disconnected'}
+          </div>
+        </div>
+
+        {/* Placeholder Stats */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-500 text-sm font-medium">Total Stations</h3>
+            <span className="text-2xl">🚏</span>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
+            -
+          </div>
+          <div className="text-xs text-gray-400 mt-2">Ready to fetch</div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-gray-500 text-sm font-medium">Active Routes</h3>
+            <span className="text-2xl">🚌</span>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
+            0
+          </div>
+          <div className="text-xs text-gray-400 mt-2">Coming soon</div>
+        </div>
+      </div>
+
+      {/* Main Content Area (Project Progress) */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 max-w-3xl">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">Project Progress</h3>
         <div className="space-y-4">
-          <div className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              시스템 상태
-            </h2>
-
-            {loading && (
-              <div className="text-gray-600">
-                로딩 중...
-              </div>
-            )}
-
-            {error && (
-              <div className="text-red-600 font-medium">
-                ❌ {error}
-                <p className="text-sm text-gray-600 mt-2">
-                  백엔드 서버가 실행 중인지 확인해주세요 (http://localhost:3000)
-                </p>
-              </div>
-            )}
-
-            {health && !error && (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">✅</span>
-                  <span className="text-lg font-medium text-green-600">
-                    {health.status}
-                  </span>
-                </div>
-                <div className="text-gray-700">
-                  <p><strong>메시지:</strong> {health.message}</p>
-                  <p><strong>데이터베이스:</strong> {health.database}</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {new Date(health.timestamp).toLocaleString('ko-KR')}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-gray-50 p-4 rounded">
-            <h3 className="font-semibold text-gray-700 mb-2">
-              현재 진행 상황
-            </h3>
-            <ul className="list-disc list-inside text-gray-600 space-y-1">
-              <li>Phase 1: 기본 인프라 구축 ✅</li>
-              <li>Phase 2: 정거장 관리 기능 🚧 (진행 중)</li>
-              <li>Phase 3: 노선 관리 기능 ⏳</li>
-              <li>Phase 4: 스케줄 관리 기능 ⏳</li>
-              <li>Phase 5: 사용자 페이지 ⏳</li>
-            </ul>
-          </div>
+          {['Phase 1: 기본 인프라 구축 ✅', 'Phase 2: 정거장 관리 기능 🚧 (진행 중)', 'Phase 3: 노선 관리 기능 ⏳', 'Phase 4: 스케줄 관리 기능 ⏳', 'Phase 5: 사용자 페이지 ⏳'].map((item, idx) => (
+            <div key={idx} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors cursor-default">
+              <span className="text-sm font-medium text-gray-700">{item}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
