@@ -7,20 +7,23 @@ import { RouteAttribute } from "../models/RouteAttribute";
 import { RouteStop } from "../models/RouteStop";
 
 import path from "path";
+// Load .env from backend directory
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const dbConfig: any = {
   type: "postgres",
-  synchronize: process.env.NODE_ENV !== "production",
-  logging: process.env.NODE_ENV === "development",
+  // Disable synchronize locally to avoid conflicting with existing production data
+  synchronize: false,
+  logging: true,
   entities: [Station, Stop, Route, RouteAttribute, RouteStop],
   migrations: [],
   subscribers: [],
+  // SSL required for Supabase
   ssl: { rejectUnauthorized: false },
 };
 
 if (process.env.DATABASE_URL) {
-  // Supabase 호환성을 위해 DATABASE_URL 파싱 후 포트 강제 조정 (TypeORM + Transaction Pooler 이슈 방지)
+  // Supabase compatibility: Force Session Pooler port (5432)
   let connectionUrl = process.env.DATABASE_URL;
   if (connectionUrl.includes(":6543")) {
     console.log("Detected Transaction Pooler port (6543). Switching to Session Pooler (5432)...");
