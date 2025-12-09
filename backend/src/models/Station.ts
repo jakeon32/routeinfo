@@ -28,4 +28,7 @@ export class Station {
   @ManyToOne(() => Stop, { nullable: true })
   @JoinColumn({ name: "primary_stop_id" })
   primaryStop?: Stop;
+
+  // Virtual Properties
+  stopsCount?: number;
 }

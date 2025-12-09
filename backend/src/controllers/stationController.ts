@@ -6,15 +6,15 @@ import { Stop } from '../models/Stop';
 const stationRepository = AppDataSource.getRepository(Station);
 const stopRepository = AppDataSource.getRepository(Stop);
 
-// 모든 정거장 조회
+// 모든 정거장 조회 (목록용 - Stops는 카운트만)
 export const getAllStations = async (req: Request, res: Response) => {
   try {
-    const stations = await stationRepository.find({
-      relations: ['stops', 'primaryStop'],
-      order: {
-        createdAt: 'DESC'
-      }
-    });
+    const stations = await stationRepository
+      .createQueryBuilder('station')
+      .loadRelationCountAndMap('station.stopsCount', 'station.stops')
+      .leftJoinAndSelect('station.primaryStop', 'primaryStop') // PrimaryStop은 보여주는게 좋음 (대표 지점)
+      .orderBy('station.createdAt', 'DESC')
+      .getMany();
 
     res.json(stations);
   } catch (error) {

@@ -6,6 +6,7 @@ export interface Station {
   createdAt: string;
   updatedAt: string;
   stops?: Stop[];
+  stopsCount?: number;
   primaryStop?: Stop | null;
 }
 

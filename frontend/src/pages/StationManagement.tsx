@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllStations, createStation, updateStation, deleteStation } from '../api/station';
+import { getAllStations, getStationById, createStation, updateStation, deleteStation } from '../api/station';
 import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStationRequest, CreateStopRequest } from '../types/station';
 import KakaoMap from '../components/KakaoMap';
@@ -17,7 +17,13 @@ function StationManagement() {
 
   // Refactor: Store ID only, derive object from stations list
   const [selectedStationId, setSelectedStationId] = useState<number | null>(null);
-  const selectedStation = stations.find(s => s.stationId === selectedStationId) || null;
+  // selectedStation will be the one in the list, but it might lack 'stops' details initially.
+  // We will fetch details and update the list (or a separate state).
+  // Strategy: Maintain a separate 'selectedStationDetail' state to avoid complex list mutations?
+  // No, actually updating the list is fine (optimistic + lazy).
+  // Let's use a specific state for the DETAILED station to render the right panel.
+  const [selectedStationDetail, setSelectedStationDetail] = useState<Station | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
 
   const [stationFormData, setStationFormData] = useState<CreateStationRequest>({ name: '' });
   const [stopFormData, setStopFormData] = useState<CreateStopRequest>({
@@ -79,6 +85,39 @@ function StationManagement() {
   useEffect(() => {
     fetchStations();
   }, []);
+
+  // 선택된 정거장 상세 정보(승하차장) 가져오기
+  useEffect(() => {
+    const fetchDetail = async () => {
+      if (!selectedStationId) {
+        setSelectedStationDetail(null);
+        return;
+      }
+
+      try {
+        setIsDetailLoading(true);
+        // Find basic info immediately for quick response
+        const basicInfo = stations.find(s => s.stationId === selectedStationId);
+        if (basicInfo) {
+          setSelectedStationDetail(basicInfo); // Show what we have first
+        }
+
+        const detail = await getStationById(selectedStationId);
+        setSelectedStationDetail(detail);
+      } catch (err) {
+        console.error("Failed to fetch station detail:", err);
+      } finally {
+        setIsDetailLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [selectedStationId, stations]); // stations change should trigger re-fetch/update logic check? 
+  // Actually, re-fetching whole list invalidates 'selectedStationDetail' if we don't sync.
+  // But for now, let's keep it simple. If stations list refreshes (e.g. create/update), we might need to re-fetch detail?
+  // Current logic: Create/Update calls fetchStations().
+  // If we just updated a station, we probably want to re-fetch that detail too. 
+  // Optimization: handleStationSubmit updates list. We should also update local detail state.
 
   // 정거장 모달 열기
   const openStationModal = (station?: Station) => {
@@ -232,6 +271,7 @@ function StationManagement() {
             <button
               onClick={() => {
                 setSelectedStationId(null);
+                setSelectedStationDetail(null);
                 openStationModal();
               }}
               className="bg-[#0FBA81] text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-[#0e9f6e] transition-colors shadow-sm flex items-center gap-1"
@@ -264,7 +304,7 @@ function StationManagement() {
                   >
                     <div className="font-semibold">{station.name}</div>
                     <div className="text-xs mt-1 opacity-70">
-                      승하차장 {station.stops?.length || 0}개
+                      승하차장 {station.stopsCount !== undefined ? station.stopsCount : (station.stops?.length || 0)}개
                     </div>
                   </div>
                 ))
@@ -277,24 +317,24 @@ function StationManagement() {
       {/* Right: Detail/Create Card */}
       <div className="w-full md:w-2/3">
         <div className="bg-white rounded-xl shadow-sm p-6 h-full border border-gray-100 overflow-y-auto custom-scrollbar">
-          {selectedStation ? (
+          {selectedStationDetail ? (
             <div className="h-full flex flex-col">
               <div className="mb-4 flex justify-between items-start">
                 <div>
                   <span className="text-xs font-semibold text-[#0FBA81] bg-[#0FBA81]/10 px-2 py-0.5 rounded-full mb-2 inline-block">
                     SELECTED
                   </span>
-                  <h2 className="text-xl font-bold text-gray-800">{selectedStation.name}</h2>
+                  <h2 className="text-xl font-bold text-gray-800">{selectedStationDetail.name}</h2>
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => openStationModal(selectedStation)}
+                    onClick={() => openStationModal(selectedStationDetail)}
                     className="text-gray-400 hover:text-blue-500"
                   >
                     수정
                   </button>
                   <button
-                    onClick={() => handleDeleteStation(selectedStation.stationId, selectedStation.name)}
+                    onClick={() => handleDeleteStation(selectedStationDetail.stationId, selectedStationDetail.name)}
                     className="text-gray-400 hover:text-red-500"
                   >
                     삭제
@@ -307,21 +347,23 @@ function StationManagement() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold text-gray-700">승하차장 목록</h3>
                   <button
-                    onClick={() => openStopModal(selectedStation)}
+                    onClick={() => openStopModal(selectedStationDetail)}
                     className="text-sm text-[#0FBA81] hover:underline font-medium"
                   >
                     + 승하차장 추가
                   </button>
                 </div>
 
-                {selectedStation.stops && selectedStation.stops.length > 0 ? (
+                {isDetailLoading && !selectedStationDetail.stops ? (
+                  <div className="py-10"><LoadingSpinner size="md" /></div>
+                ) : selectedStationDetail.stops && selectedStationDetail.stops.length > 0 ? (
                   <div className="space-y-3">
-                    {selectedStation.stops.map(stop => (
+                    {selectedStationDetail.stops.map(stop => (
                       <div key={stop.stopId} className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex justify-between items-center group hover:border-[#0FBA81] transition-colors">
                         <div>
                           <div className="font-medium text-gray-800 flex items-center gap-2">
                             {stop.name}
-                            {stop.stopId === selectedStation.primaryStopId && (
+                            {stop.stopId === selectedStationDetail.primaryStopId && (
                               <span className="text-[10px] bg-[#0FBA81] text-white px-1.5 py-0.5 rounded-full">MAIN</span>
                             )}
                           </div>
@@ -351,7 +393,7 @@ function StationManagement() {
                           </div>
                         </div>
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openStopModal(selectedStation, stop)} className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-lg transition-colors" title="수정">
+                          <button onClick={() => openStopModal(selectedStationDetail, stop)} className="p-1.5 hover:bg-blue-50 text-blue-500 rounded-lg transition-colors" title="수정">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                           </button>
                           <button onClick={() => handleDeleteStop(stop.stopId, stop.name)} className="p-1.5 hover:bg-red-50 text-red-500 rounded-lg transition-colors" title="삭제">
@@ -428,7 +470,7 @@ function StationManagement() {
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 my-8">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               {editingStop ? '승하차장 수정' : '승하차장 추가'}
-              {selectedStation && <span className="text-gray-600 text-base ml-2">({selectedStation.name})</span>}
+              {selectedStationDetail && <span className="text-gray-600 text-base ml-2">({selectedStationDetail.name})</span>}
             </h2>
 
             <form onSubmit={handleStopSubmit}>
