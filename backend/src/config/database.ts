@@ -20,6 +20,10 @@ const dbConfig: any = {
   subscribers: [],
   // SSL required for Supabase
   ssl: { rejectUnauthorized: false },
+  extra: {
+    max: 1, // Limit pool size for Serverless (prevents connection exhaustion)
+    connectionTimeoutMillis: 5000,
+  },
 };
 
 if (process.env.DATABASE_URL) {

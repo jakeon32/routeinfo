@@ -37,9 +37,13 @@ export const getStationById = async (req: Request, res: Response) => {
     }
 
     res.json(station);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching station:', error);
-    res.status(500).json({ message: 'Failed to fetch station', error });
+    res.status(500).json({
+      message: 'Failed to fetch station',
+      error: error.message || 'Unknown error',
+      details: process.env.NODE_ENV === 'development' ? error : undefined
+    });
   }
 };
 
