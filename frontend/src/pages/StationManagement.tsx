@@ -4,6 +4,7 @@ import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStationRequest, CreateStopRequest } from '../types/station';
 import KakaoMap from '../components/KakaoMap';
 import { uploadFile } from '../api/upload';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 function StationManagement() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -240,7 +241,9 @@ function StationManagement() {
           </div>
 
           {loading ? (
-            <div className="text-center py-8 text-gray-500">로딩 중...</div>
+            <div className="flex-1 flex items-center justify-center">
+              <LoadingSpinner size="lg" />
+            </div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">{error}</div>
           ) : (
