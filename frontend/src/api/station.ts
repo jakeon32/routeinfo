@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Station, CreateStationRequest, UpdateStationRequest } from '../types/station';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
 
 // 모든 정거장 조회
 export const getAllStations = async (): Promise<Station[]> => {
