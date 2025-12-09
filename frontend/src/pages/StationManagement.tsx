@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { getAllStations, createStation, updateStation, deleteStation } from '../api/station';
 import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStationRequest, CreateStopRequest } from '../types/station';
+import KakaoMap from '../components/KakaoMap';
+import { uploadFile } from '../api/upload';
 
 function StationManagement() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -22,6 +24,35 @@ function StationManagement() {
     description: '',
     photoUrl: ''
   });
+  const [uploadMode, setUploadMode] = useState<'url' | 'file'>('url');
+  const [isUploading, setIsUploading] = useState(false);
+
+  // 위치 선택 핸들러
+  const handleLocationSelect = (lat: number, lng: number, addr: string) => {
+    setStopFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      address: addr || prev.address
+    }));
+  };
+
+  // 파일 업로드 핸들러
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const { url } = await uploadFile(file);
+      setStopFormData(prev => ({ ...prev, photoUrl: url }));
+    } catch (err) {
+      console.error('File upload error:', err);
+      alert('파일 업로드에 실패했습니다.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // 정거장 목록 조회
   const fetchStations = async () => {
@@ -80,6 +111,8 @@ function StationManagement() {
         photoUrl: ''
       });
     }
+
+    setUploadMode('url');
     setIsStopModalOpen(true);
   };
 
@@ -207,8 +240,8 @@ function StationManagement() {
                     key={station.stationId}
                     onClick={() => setSelectedStation(station)}
                     className={`p-3 rounded-lg cursor-pointer transition-all border ${selectedStation?.stationId === station.stationId
-                        ? 'bg-[#0FBA81]/10 border-[#0FBA81] text-[#0FBA81]'
-                        : 'bg-gray-50 border-transparent hover:bg-gray-100 text-gray-700'
+                      ? 'bg-[#0FBA81]/10 border-[#0FBA81] text-[#0FBA81]'
+                      : 'bg-gray-50 border-transparent hover:bg-gray-100 text-gray-700'
                       }`}
                   >
                     <div className="font-semibold">{station.name}</div>
@@ -301,7 +334,7 @@ function StationManagement() {
 
       {/* 정거장 생성/수정 모달 */}
       {isStationModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               {editingStation ? '정거장 수정' : '정거장 추가'}
@@ -344,7 +377,7 @@ function StationManagement() {
 
       {/* 승하차장 생성/수정 모달 */}
       {isStopModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 my-8">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               {editingStop ? '승하차장 수정' : '승하차장 추가'}
@@ -371,8 +404,16 @@ function StationManagement() {
                 {/* 주소 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    주소
+                    위치 찾기 & 주소
                   </label>
+                  <div className="mb-3 rounded-lg overflow-hidden border border-gray-300">
+                    <KakaoMap
+                      latitude={stopFormData.latitude || 37.5665}
+                      longitude={stopFormData.longitude || 126.9780}
+                      onLocationSelect={handleLocationSelect}
+                      height="250px"
+                    />
+                  </div>
                   <input
                     type="text"
                     value={stopFormData.address}
@@ -431,15 +472,62 @@ function StationManagement() {
                 {/* 사진 URL */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    사진 URL
+                    사진
                   </label>
-                  <input
-                    type="text"
-                    value={stopFormData.photoUrl}
-                    onChange={(e) => setStopFormData({ ...stopFormData, photoUrl: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0FBA81] focus:border-transparent outline-none transition-all"
-                    placeholder="https://example.com/photo.jpg"
-                  />
+                  <div className="flex gap-4 mb-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="uploadMode"
+                        checked={uploadMode === 'url'}
+                        onChange={() => setUploadMode('url')}
+                        className="text-[#0FBA81] focus:ring-[#0FBA81]"
+                      />
+                      <span className="text-sm text-gray-600">URL 입력</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="uploadMode"
+                        checked={uploadMode === 'file'}
+                        onChange={() => setUploadMode('file')}
+                        className="text-[#0FBA81] focus:ring-[#0FBA81]"
+                      />
+                      <span className="text-sm text-gray-600">직접 업로드</span>
+                    </label>
+                  </div>
+
+                  {uploadMode === 'url' ? (
+                    <input
+                      type="text"
+                      value={stopFormData.photoUrl}
+                      onChange={(e) => setStopFormData({ ...stopFormData, photoUrl: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0FBA81] focus:border-transparent outline-none transition-all"
+                      placeholder="https://example.com/photo.jpg"
+                    />
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#0FBA81]/10 file:text-[#0FBA81] hover:file:bg-[#0FBA81]/20"
+                      />
+                      {isUploading && <span className="text-xs text-gray-400">업로드 중...</span>}
+                    </div>
+                  )}
+                  {stopFormData.photoUrl && (
+                    <div className="mt-2 relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                      <img src={stopFormData.photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setStopFormData({ ...stopFormData, photoUrl: '' })}
+                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 

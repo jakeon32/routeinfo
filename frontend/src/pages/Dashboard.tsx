@@ -6,7 +6,6 @@ import ActivityChart from '../components/ActivityChart';
 
 function Dashboard() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Initial fetch
@@ -20,7 +19,6 @@ function Dashboard() {
   const fetchHealth = async () => {
     try {
       // Don't set global loading to true on background refresh to avoid flickering
-      if (!health) setLoading(true);
       const data = await checkHealth();
       setHealth(data);
     } catch (err) {
@@ -29,7 +27,7 @@ function Dashboard() {
       // For status display, we might want to explicitly show error
       setHealth(prev => prev ? { ...prev, status: 'error', database: 'disconnected' } : { status: 'error', message: 'Offline', timestamp: new Date().toISOString(), database: 'disconnected' });
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -146,7 +144,7 @@ function Dashboard() {
                     </td>
                     <td className="py-3 border-b border-gray-50 text-right">
                       <span className={`text-[10px] px-2 py-1 rounded-full font-medium ${route.status === 'Running' ? 'bg-green-100 text-green-600' :
-                          route.status === 'Waiting' ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400'
+                        route.status === 'Waiting' ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400'
                         }`}>
                         {route.status}
                       </span>

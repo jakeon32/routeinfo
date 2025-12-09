@@ -4,7 +4,7 @@ import { getStationById, updateStation } from '../api/station';
 import { createStop, updateStop, deleteStop } from '../api/stop';
 import type { Station, Stop, CreateStopRequest } from '../types/station';
 import KakaoMap from '../components/KakaoMap';
-import { uploadPhoto, getPhotoUrl } from '../api/upload';
+import { uploadFile } from '../api/upload';
 
 function StationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -159,7 +159,7 @@ function StationDetail() {
 
     try {
       setUploading(true);
-      const result = await uploadPhoto(file);
+      const result = await uploadFile(file);
       setStopFormData({
         ...stopFormData,
         photoUrl: result.url
@@ -314,7 +314,7 @@ function StationDetail() {
                       <td className="px-4 py-3 text-sm hidden sm:table-cell">
                         {stop.photoUrl ? (
                           <img
-                            src={getPhotoUrl(stop.photoUrl)}
+                            src={stop.photoUrl}
                             alt={stop.name}
                             className="w-12 h-12 object-cover rounded"
                             onError={(e) => {
@@ -508,7 +508,7 @@ function StationDetail() {
                       {stopFormData.photoUrl && (
                         <div className="mt-2">
                           <img
-                            src={getPhotoUrl(stopFormData.photoUrl)}
+                            src={stopFormData.photoUrl}
                             alt="미리보기"
                             className="max-w-xs max-h-40 rounded-lg border border-gray-300"
                             onError={(e) => {

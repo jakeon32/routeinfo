@@ -1,39 +1,17 @@
+
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-const API_URL = `${API_BASE_URL}/api`;
+const API_Base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-export interface UploadResponse {
-  message: string;
-  url: string;
-  filename: string;
-  originalname: string;
-  size: number;
-}
-
-// 파일 업로드
-export const uploadPhoto = async (file: File): Promise<UploadResponse> => {
+export const uploadFile = async (file: File): Promise<{ url: string; filename: string }> => {
   const formData = new FormData();
   formData.append('photo', file);
 
-  const response = await axios.post<UploadResponse>(`${API_URL}/upload`, formData, {
+  const response = await axios.post(`${API_Base_URL}/upload`, formData, {
     headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+      'Content-Type': 'multipart/form-data',
+    },
   });
 
   return response.data;
-};
-
-// 파일 삭제
-export const deletePhoto = async (filename: string): Promise<void> => {
-  await axios.delete(`${API_URL}/upload/${filename}`);
-};
-
-// 파일 URL 생성
-export const getPhotoUrl = (url: string): string => {
-  if (url.startsWith('http')) {
-    return url;
-  }
-  return `${API_BASE_URL}${url}`;
 };
