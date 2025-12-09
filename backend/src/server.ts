@@ -1,16 +1,18 @@
 import "reflect-metadata";
-import express, { Express, Request, Response } from "express";
-import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+
+// Load env vars before anything else
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
+import express, { Express, Request, Response } from "express";
+import cors from "cors";
 import { AppDataSource } from "./config/database";
 import stationRoutes from "./routes/stationRoutes";
 import stopRoutes from "./routes/stopRoutes";
 import routeRoutes from "./routes/routeRoutes";
 import scheduleRoutes from "./routes/scheduleRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
-
-dotenv.config();
 
 const app: Express = express();
 const PORT = process.env.PORT || 3000;

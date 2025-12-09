@@ -61,9 +61,11 @@ function StationManagement() {
       const data = await getAllStations();
       setStations(data);
       setError(null);
+      return data;
     } catch (err) {
       setError('정거장 목록을 불러오는데 실패했습니다.');
       console.error(err);
+      return [];
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,14 @@ function StationManagement() {
       } else {
         await createStation(stationFormData);
       }
-      await fetchStations();
+      const updatedStations = await fetchStations();
+
+      // Update selected station if it was edited
+      if (editingStation && selectedStation?.stationId === editingStation.stationId) {
+        const fresh = updatedStations.find(s => s.stationId === editingStation.stationId);
+        if (fresh) setSelectedStation(fresh);
+      }
+
       closeStationModal();
     } catch (err) {
       alert('저장에 실패했습니다.');
@@ -167,7 +176,14 @@ function StationManagement() {
       } else {
         await createStop(stopFormData);
       }
-      await fetchStations();
+      const updatedStations = await fetchStations();
+
+      // Refresh selected station to show new stop
+      if (selectedStation) {
+        const fresh = updatedStations.find(s => s.stationId === selectedStation.stationId);
+        if (fresh) setSelectedStation(fresh);
+      }
+
       closeStopModal();
     } catch (err) {
       alert('저장에 실패했습니다.');

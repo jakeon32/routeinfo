@@ -7,7 +7,7 @@ import { RouteAttribute } from "../models/RouteAttribute";
 import { RouteStop } from "../models/RouteStop";
 
 import path from "path";
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const dbConfig: any = {
   type: "postgres",
