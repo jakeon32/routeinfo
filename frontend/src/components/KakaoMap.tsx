@@ -129,8 +129,8 @@ function KakaoMap({ latitude, longitude, onLocationSelect, markers, height = '40
   }, [latitude, longitude, markers, onLocationSelect, isLoaded]);
 
   // 장소 검색 핸들러
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!keyword.trim() || !window.kakao) return;
 
     const ps = new window.kakao.maps.services.Places();
@@ -222,21 +222,28 @@ function KakaoMap({ latitude, longitude, onLocationSelect, markers, height = '40
       {/* Search Box Overlay */}
       {onLocationSelect && (
         <div className="absolute top-2 left-2 right-2 z-10 flex flex-col gap-1">
-          <form onSubmit={handleSearch} className="flex shadow-md">
+          <div className="flex shadow-md">
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSearch(e);
+                }
+              }}
               placeholder="장소 검색 (예: 강남역, 시청)"
               className="flex-1 px-3 py-2 border border-r-0 border-gray-300 rounded-l-lg outline-none text-sm bg-white"
             />
             <button
-              type="submit"
+              type="button"
+              onClick={handleSearch}
               className="bg-[#0FBA81] text-white px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-[#0e9f6e]"
             >
               검색
             </button>
-          </form>
+          </div>
 
           {/* Search Results Dropdown */}
           {isSearchVisible && searchResults.length > 0 && (
