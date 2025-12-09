@@ -215,6 +215,12 @@ function StationManagement() {
     }
   };
 
+  // 클립보드 복사 핸들러
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert(`복사되었습니다: ${text}`);
+  };
+
   return (
     <div className="flex flex-col md:flex-row gap-6 h-[calc(100vh-100px)]">
       {/* Left: Station List Card */}
@@ -319,16 +325,26 @@ function StationManagement() {
                           <div className="text-sm text-gray-500 mt-1 flex items-center gap-1">
                             <span>📍</span> {stop.address || '주소 없음'}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1.5 flex items-center gap-3 font-mono bg-white px-2 py-1 rounded border border-gray-200 w-fit">
-                            <span className="flex items-center gap-1">
-                              <span className="text-gray-400">LAT</span>
-                              <span className="font-semibold text-[#0FBA81]">{Number(stop.latitude).toFixed(6)}</span>
-                            </span>
-                            <span className="w-px h-3 bg-gray-200"></span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-gray-400">LNG</span>
-                              <span className="font-semibold text-[#0FBA81]">{Number(stop.longitude).toFixed(6)}</span>
-                            </span>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="text-xs text-gray-500 flex items-center gap-3 font-mono bg-white px-2 py-1 rounded border border-gray-200 w-fit">
+                              <span className="flex items-center gap-1">
+                                <span className="text-gray-400">LAT</span>
+                                <span className="font-semibold text-[#0FBA81]">{Number(stop.latitude).toFixed(6)}</span>
+                              </span>
+                              <span className="w-px h-3 bg-gray-200"></span>
+                              <span className="flex items-center gap-1">
+                                <span className="text-gray-400">LNG</span>
+                                <span className="font-semibold text-[#0FBA81]">{Number(stop.longitude).toFixed(6)}</span>
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleCopy(`${stop.latitude}, ${stop.longitude}`)}
+                              className="text-xs text-gray-400 hover:text-[#0FBA81] bg-white border border-transparent hover:border-[#0FBA81] px-2 py-1 rounded transition-colors flex items-center gap-1"
+                              title="좌표 복사"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                              <span>복사</span>
+                            </button>
                           </div>
                         </div>
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
