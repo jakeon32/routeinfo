@@ -5,7 +5,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 
 // 모든 정거장 조회
 export const getAllStations = async (): Promise<Station[]> => {
-  const response = await axios.get(`${API_BASE_URL}/api/stations`);
+  // 캐싱 방지를 위한 timestamp 추가
+  const response = await axios.get(`${API_BASE_URL}/api/stations?t=${new Date().getTime()}`);
   return response.data;
 };
 
